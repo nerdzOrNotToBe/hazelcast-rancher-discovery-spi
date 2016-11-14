@@ -48,6 +48,9 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	private final String stackName;
 	private final String url;
 
+	private String envId;
+	private String stackId;
+
 	RancherDiscoveryStrategy(ILogger logger, Map<String, Comparable> properties) {
 		super(logger, properties);
 
@@ -61,25 +64,24 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	@Override
 	public Iterable<DiscoveryNode> discoverNodes() {
-		List<String> assignments = filterHosts();
+		CloseableHttpClient client = HttpClientBuilder.create().build();
+		List<String> assignments = null;
+		try {
+			assignments = filterHosts(client);
+			client.close();
+		} catch (IOException | ParseException e) {
+			getLogger().severe(e);
+		}
 		return mapToDiscoveryNodes(assignments);
 	}
 
-	private List<String> filterHosts() {
-		String environment_name = System.getenv(RANCHER_ENVIRONMENT_NAME);
-		try {
-			CloseableHttpClient client = HttpClientBuilder.create().build();
-getLogger().info(url+"/"+environmentName+"/services/"+stackName);
-			HttpGet request = new HttpGet(url+"/"+environmentName+"/services/"+stackName);
-			HttpResponse response = client.execute(request);
-			HttpEntity entity = response.getEntity();
-			JSONObject jsonObject = (JSONObject) new JSONParser().parse(new InputStreamReader(entity.getContent(), "UTF-8"));
-			getLogger().info(jsonObject.toJSONString());
-		} catch (IOException e) {
-			getLogger().severe(e);
-		} catch (ParseException e) {
-			getLogger().severe(e);
-		}
+	private List<String> filterHosts(CloseableHttpClient client) throws IOException, ParseException {
+		getLogger().info(url+"/"+environmentName+"/services/"+stackName);
+		HttpGet request = new HttpGet(url+"/"+environmentName+"/services/"+stackName);
+		HttpResponse response = client.execute(request);
+		HttpEntity entity = response.getEntity();
+		JSONObject jsonObject = (JSONObject) new JSONParser().parse(new InputStreamReader(entity.getContent(), "UTF-8"));
+		getLogger().info(jsonObject.toJSONString());
 		List<String> assignments = new ArrayList<>();
 		return assignments;
 	}
