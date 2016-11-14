@@ -22,17 +22,20 @@ import com.hazelcast.spi.discovery.DiscoveryNode;
 import com.hazelcast.spi.discovery.DiscoveryStrategy;
 import com.hazelcast.spi.discovery.DiscoveryStrategyFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by phaneesh on 01/02/16.
  */
 public class RancherDiscoveryStrategyFactory implements DiscoveryStrategyFactory {
 
-	private static final Collection<PropertyDefinition> PROPERTIES = Collections.singletonList(RancherDiscoveryConfiguration.SERVICE_NAME);
+	private static final Collection<PropertyDefinition> PROPERTIES =
+			Arrays.asList(new PropertyDefinition[]{
+					RancherDiscoveryConfiguration.CLUSTER_NAME,
+					RancherDiscoveryConfiguration.STACK_NAME,
+					RancherDiscoveryConfiguration.ENVIRONMENT_NAME,
+					RancherDiscoveryConfiguration.URL,
+			});
 
 	@Override
 	public Class<? extends DiscoveryStrategy> getDiscoveryStrategyType() {

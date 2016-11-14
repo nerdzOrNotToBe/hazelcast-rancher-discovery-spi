@@ -58,7 +58,7 @@ public class DiscoveryTest {
         config.setProperty(GroupProperty.SOCKET_CLIENT_BIND_ANY, "false");
         config.setProperty(GroupProperty.SOCKET_BIND_ANY, "false");
         NetworkConfig networkConfig = config.getNetworkConfig();
-	    networkConfig.setInterfaces(new InterfacesConfig().addInterface("10.34.*.*").setEnabled(true));
+	    networkConfig.setInterfaces(new InterfacesConfig().addInterface("10.75.*.*").setEnabled(true));
         networkConfig.getInterfaces().addInterface(InetAddress.getLocalHost().getHostAddress()).setEnabled(true);
         JoinConfig joinConfig = networkConfig.getJoin();
         joinConfig.getTcpIpConfig().setEnabled(false);
@@ -66,8 +66,8 @@ public class DiscoveryTest {
         joinConfig.getAwsConfig().setEnabled(false);
         DiscoveryConfig discoveryConfig = joinConfig.getDiscoveryConfig();
         DiscoveryStrategyConfig discoveryStrategyConfig = new DiscoveryStrategyConfig(new RancherDiscoveryStrategyFactory());
-        discoveryStrategyConfig.addProperty("service-name", "hz_disco_test");
-        discoveryStrategyConfig.addProperty("url", "http://10.34.0.252/8080/v1/projects/");
+        discoveryStrategyConfig.addProperty("cluster-name", "pulse");
+        discoveryStrategyConfig.addProperty("url", "http://10.34.0.252:8080/v1/projects/1a5/services/1s73");
         discoveryConfig.addDiscoveryStrategyConfig(discoveryStrategyConfig);
         return Hazelcast.newHazelcastInstance(config);
     }

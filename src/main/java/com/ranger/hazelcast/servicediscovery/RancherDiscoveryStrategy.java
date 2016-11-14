@@ -33,7 +33,6 @@ import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.net.InetAddress;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.*;
 
@@ -44,14 +43,20 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	public static final String RANCHER_ENVIRONMENT_NAME = "rancher_environment_name";
 
-	private final String siteDomain;
+	private final String clusterName;
+	private final String environmentName;
+	private final String stackName;
+	private final String url;
 
 	RancherDiscoveryStrategy(ILogger logger, Map<String, Comparable> properties) {
 		super(logger, properties);
 
 		// make it possible to override the value from the configuration on
 		// the system's environment or JVM properties -Ddiscovery.hosts.site-domain=some.domain
-		this.siteDomain = getOrNull("discovery.hosts", RancherDiscoveryConfiguration.SERVICE_NAME);
+		this.clusterName = getOrNull("cluster-name", RancherDiscoveryConfiguration.CLUSTER_NAME);
+		this.stackName = getOrNull("stack-name", RancherDiscoveryConfiguration.STACK_NAME);
+		this.environmentName = getOrNull("environment-name", RancherDiscoveryConfiguration.ENVIRONMENT_NAME);
+		this.url = getOrNull("url", RancherDiscoveryConfiguration.URL);
 	}
 
 	@Override
@@ -64,11 +69,12 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		String environment_name = System.getenv(RANCHER_ENVIRONMENT_NAME);
 		try {
 			CloseableHttpClient client = HttpClientBuilder.create().build();
-			HttpGet request = new HttpGet(RancherDiscoveryConfiguration.URL.key());
+getLogger().info(url+"/"+environmentName+"/services/"+stackName);
+			HttpGet request = new HttpGet(url+"/"+environmentName+"/services/"+stackName);
 			HttpResponse response = client.execute(request);
 			HttpEntity entity = response.getEntity();
 			JSONObject jsonObject = (JSONObject) new JSONParser().parse(new InputStreamReader(entity.getContent(), "UTF-8"));
-
+			getLogger().info(jsonObject.toJSONString());
 		} catch (IOException e) {
 			getLogger().severe(e);
 		} catch (ParseException e) {
@@ -112,14 +118,6 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		} catch (IOException e) {
 			throw new RuntimeException("Could not read hosts file", e);
 		}
-	}
-
-	private boolean matchesDomain(String line) {
-		if (line.isEmpty()) {
-			return false;
-		}
-		String hostname = sliceHostname(line);
-		return hostname.endsWith("." + siteDomain);
 	}
 
 	private String sliceAddress(String assignment) {

@@ -22,7 +22,11 @@ import com.hazelcast.config.properties.SimplePropertyDefinition;
 
 public class RancherDiscoveryConfiguration {
 
-    public static final PropertyDefinition SERVICE_NAME = new SimplePropertyDefinition("service-name", PropertyTypeConverter.STRING);
+    public static final PropertyDefinition CLUSTER_NAME = new SimplePropertyDefinition("cluster-name", PropertyTypeConverter.STRING);
+
+    public static final PropertyDefinition STACK_NAME = new SimplePropertyDefinition("stack-name", PropertyTypeConverter.STRING);
+
+    public static final PropertyDefinition ENVIRONMENT_NAME = new SimplePropertyDefinition("environment-name", PropertyTypeConverter.STRING);
 
     public static final PropertyDefinition URL = new SimplePropertyDefinition("url", PropertyTypeConverter.STRING);
 
