@@ -20,6 +20,7 @@ import com.hazelcast.config.*;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.instance.GroupProperty;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -33,6 +34,7 @@ public class DiscoveryTest {
 
 
     @Test
+    @Ignore
     public void testSingleMemberDiscovery() throws IOException {
         HazelcastInstance hazelcast = getHazelcastInstance(5701);
         assertTrue(hazelcast.getCluster().getMembers().size() > 0);
@@ -40,6 +42,7 @@ public class DiscoveryTest {
     }
 
     @Test
+    @Ignore
     public void testMultiMemberDiscovery() throws UnknownHostException {
         HazelcastInstance hazelcast1 = getHazelcastInstance(5701);
         HazelcastInstance hazelcast2 = getHazelcastInstance(5801);
@@ -58,7 +61,7 @@ public class DiscoveryTest {
         config.setProperty(GroupProperty.SOCKET_CLIENT_BIND_ANY, "false");
         config.setProperty(GroupProperty.SOCKET_BIND_ANY, "false");
         NetworkConfig networkConfig = config.getNetworkConfig();
-	    networkConfig.setInterfaces(new InterfacesConfig().addInterface("10.75.*.*").setEnabled(true));
+	    networkConfig.setInterfaces(new InterfacesConfig().addInterface("10.34.*.*").setEnabled(true));
         networkConfig.getInterfaces().addInterface(InetAddress.getLocalHost().getHostAddress()).setEnabled(true);
         JoinConfig joinConfig = networkConfig.getJoin();
         joinConfig.getTcpIpConfig().setEnabled(false);
@@ -67,7 +70,9 @@ public class DiscoveryTest {
         DiscoveryConfig discoveryConfig = joinConfig.getDiscoveryConfig();
         DiscoveryStrategyConfig discoveryStrategyConfig = new DiscoveryStrategyConfig(new RancherDiscoveryStrategyFactory());
         discoveryStrategyConfig.addProperty("cluster-name", "pulse");
-        discoveryStrategyConfig.addProperty("url", "http://10.34.0.252:8080/v1/projects/1a5/services/1s73");
+        discoveryStrategyConfig.addProperty("stack-name", "vertx1");
+        discoveryStrategyConfig.addProperty("environment-name", "Default");
+        discoveryStrategyConfig.addProperty("url", "http://10.34.0.252:8080/v1");
         discoveryConfig.addDiscoveryStrategyConfig(discoveryStrategyConfig);
         return Hazelcast.newHazelcastInstance(config);
     }

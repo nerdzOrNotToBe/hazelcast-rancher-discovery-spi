@@ -26,12 +26,15 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -50,6 +53,7 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	private String envId;
 	private String stackId;
+	private List<String> serviceId = new ArrayList<>();
 
 	RancherDiscoveryStrategy(ILogger logger, Map<String, Comparable> properties) {
 		super(logger, properties);
@@ -64,10 +68,19 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	@Override
 	public Iterable<DiscoveryNode> discoverNodes() {
-		CloseableHttpClient client = HttpClientBuilder.create().build();
-		List<String> assignments = null;
+		CloseableHttpClient client = HttpClients.createDefault();
+		List<JSONObject> assignments = null;
 		try {
-			assignments = filterHosts(client);
+			if(envId == null){
+				findEnvironment(client);
+			}
+			if(stackId == null){
+				findStack(client);
+			}
+			if(envId != null && stackId !=null){
+				filterService(client);
+				assignments = filterHosts(client);
+			}
 			client.close();
 		} catch (IOException | ParseException e) {
 			getLogger().severe(e);
@@ -75,23 +88,82 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		return mapToDiscoveryNodes(assignments);
 	}
 
-	private List<String> filterHosts(CloseableHttpClient client) throws IOException, ParseException {
-		getLogger().info(url+"/"+environmentName+"/services/"+stackName);
-		HttpGet request = new HttpGet(url+"/"+environmentName+"/services/"+stackName);
+	private List<JSONObject> filterHosts(CloseableHttpClient client) throws IOException, ParseException {
+		List<JSONObject> list = new ArrayList<>();
+		for (String id : serviceId) {
+			HttpGet request = new HttpGet(url+"/projects/"+envId+"/services/"+id+"/instances");
+			HttpResponse response = client.execute(request);
+			HttpEntity entity = response.getEntity();
+			JSONObject jsonObject = (JSONObject) new JSONParser().parse(new InputStreamReader(entity.getContent(), "UTF-8"));
+			JSONArray data = (JSONArray) jsonObject.get("data");
+			data.forEach(x ->{
+				JSONObject env = (JSONObject) x;
+				JSONObject assignment = new JSONObject();
+				assignment.put("host", env.get("name"));
+				assignment.put( "ip", env.get("primaryIpAddress"));
+				list.add(assignment);
+			});
+			EntityUtils.consume(entity);
+		}
+		return list;
+	}
+
+	private void findStack(CloseableHttpClient client) throws IOException, ParseException {
+		HttpGet request = new HttpGet(url+"/projects/"+envId+"/environments");
 		HttpResponse response = client.execute(request);
 		HttpEntity entity = response.getEntity();
 		JSONObject jsonObject = (JSONObject) new JSONParser().parse(new InputStreamReader(entity.getContent(), "UTF-8"));
-		getLogger().info(jsonObject.toJSONString());
-		List<String> assignments = new ArrayList<>();
-		return assignments;
+		JSONArray data = (JSONArray) jsonObject.get("data");
+		data.forEach(x ->{
+			JSONObject stack = (JSONObject) x;
+			String name = (String) stack.get("name");
+			if(stackName.equals(name)){
+				stackId = (String) stack.get("id");
+			}
+		});
+		EntityUtils.consume(entity);
 	}
 
-	private Iterable<DiscoveryNode> mapToDiscoveryNodes(List<String> assignments) {
+	private void findEnvironment(CloseableHttpClient client) throws IOException, ParseException {
+		HttpGet request = new HttpGet(url+"/projects");
+		HttpResponse response = client.execute(request);
+		HttpEntity entity = response.getEntity();
+		JSONObject jsonObject = (JSONObject) new JSONParser().parse(new InputStreamReader(entity.getContent(), "UTF-8"));
+		JSONArray data = (JSONArray) jsonObject.get("data");
+		data.forEach(x ->{
+			JSONObject env = (JSONObject) x;
+			String name = (String) env.get("name");
+			if(environmentName.equals(name)){
+				envId = (String) env.get("id");
+			}
+		});
+		EntityUtils.consume(entity);
+	}
+
+	private void filterService(CloseableHttpClient client) throws IOException, ParseException {
+		HttpGet request = new HttpGet(url+"/projects/"+envId+"/environments/"+stackId+"/services");
+		HttpResponse response = client.execute(request);
+		HttpEntity entity = response.getEntity();
+		JSONObject jsonObject = (JSONObject) new JSONParser().parse(new InputStreamReader(entity.getContent(), "UTF-8"));
+		JSONArray data = (JSONArray) jsonObject.get("data");
+		data.forEach(x ->{
+			JSONObject service = (JSONObject) x;
+			JSONObject launchConfig = (JSONObject) service.get("launchConfig");
+			JSONObject environment = (JSONObject) launchConfig.get("environment");
+			String cluster = (String) environment.get("cluster-name");
+			if(clusterName.equals(cluster)){
+				serviceId.add((String) service.get("id"));
+			}
+		});
+		EntityUtils.consume(entity);
+	}
+
+	private Iterable<DiscoveryNode> mapToDiscoveryNodes(List<JSONObject> assignments) {
 		Collection<DiscoveryNode> discoveredNodes = new ArrayList<>();
 
-		for (String assignment : assignments) {
-			String address = sliceAddress(assignment);
-			String hostname = sliceHostname(assignment);
+		for (JSONObject assignment : assignments) {
+			String address = (String) assignment.get("ip");
+			String hostname = (String) assignment.get("host");
 
 			Map<String, Object> attributes = Collections.<String, Object>singletonMap("hostname", hostname);
 
@@ -103,40 +175,6 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		return discoveredNodes;
 	}
 
-	private List<String> readLines(File hosts) {
-		try {
-			List<String> lines = new ArrayList<String>();
-			BufferedReader reader = new BufferedReader(new FileReader(hosts));
-
-			String line;
-			while ((line = reader.readLine()) != null) {
-				line = line.trim();
-				if (!line.startsWith("#")) {
-					lines.add(line.trim());
-				}
-			}
-
-			return lines;
-		} catch (IOException e) {
-			throw new RuntimeException("Could not read hosts file", e);
-		}
-	}
-
-	private String sliceAddress(String assignment) {
-		String[] tokens = assignment.split("\\p{javaSpaceChar}+");
-		if (tokens.length < 1) {
-			throw new RuntimeException("Could not find ip address in " + assignment);
-		}
-		return tokens[0];
-	}
-
-	private static String sliceHostname(String assignment) {
-		String[] tokens = assignment.split("(\\p{javaSpaceChar}+|\t+)+");
-		if (tokens.length < 2) {
-			throw new RuntimeException("Could not find hostname in " + assignment);
-		}
-		return tokens[1];
-	}
 
 	private InetAddress mapToInetAddress(String address) {
 		try {
