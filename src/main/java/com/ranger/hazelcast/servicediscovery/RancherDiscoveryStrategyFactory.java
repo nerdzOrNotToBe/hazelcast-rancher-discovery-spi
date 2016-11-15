@@ -34,7 +34,7 @@ public class RancherDiscoveryStrategyFactory implements DiscoveryStrategyFactory
 					RancherDiscoveryConfiguration.CLUSTER_NAME,
 					RancherDiscoveryConfiguration.STACK_NAME,
 					RancherDiscoveryConfiguration.ENVIRONMENT_NAME,
-					RancherDiscoveryConfiguration.URL,
+					RancherDiscoveryConfiguration.RANCHER_API,
 			});
 
 	@Override

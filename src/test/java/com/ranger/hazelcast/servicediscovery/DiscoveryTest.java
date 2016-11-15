@@ -69,10 +69,10 @@ public class DiscoveryTest {
         joinConfig.getAwsConfig().setEnabled(false);
         DiscoveryConfig discoveryConfig = joinConfig.getDiscoveryConfig();
         DiscoveryStrategyConfig discoveryStrategyConfig = new DiscoveryStrategyConfig(new RancherDiscoveryStrategyFactory());
-        discoveryStrategyConfig.addProperty("cluster-name", "pulse");
+        discoveryStrategyConfig.addProperty("cluster-name", "backend");
         discoveryStrategyConfig.addProperty("stack-name", "vertx1");
         discoveryStrategyConfig.addProperty("environment-name", "Default");
-        discoveryStrategyConfig.addProperty("url", "http://10.34.0.252:8080/v1");
+        discoveryStrategyConfig.addProperty("rancher-api", "http://10.34.0.252:8080/v1");
         discoveryConfig.addDiscoveryStrategyConfig(discoveryStrategyConfig);
         return Hazelcast.newHazelcastInstance(config);
     }

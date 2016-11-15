@@ -63,7 +63,7 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		this.clusterName = getOrNull("cluster-name", RancherDiscoveryConfiguration.CLUSTER_NAME);
 		this.stackName = getOrNull("stack-name", RancherDiscoveryConfiguration.STACK_NAME);
 		this.environmentName = getOrNull("environment-name", RancherDiscoveryConfiguration.ENVIRONMENT_NAME);
-		this.url = getOrNull("url", RancherDiscoveryConfiguration.URL);
+		this.url = getOrNull("rancher-api", RancherDiscoveryConfiguration.RANCHER_API);
 	}
 
 	@Override
@@ -98,10 +98,12 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			JSONArray data = (JSONArray) jsonObject.get("data");
 			data.forEach(x ->{
 				JSONObject env = (JSONObject) x;
-				JSONObject assignment = new JSONObject();
-				assignment.put("host", env.get("name"));
-				assignment.put( "ip", env.get("primaryIpAddress"));
-				list.add(assignment);
+				if("running".equals(env.get("state"))) {
+					JSONObject assignment = new JSONObject();
+					assignment.put("host", env.get("name"));
+					assignment.put("ip", env.get("primaryIpAddress"));
+					list.add(assignment);
+				}
 			});
 			EntityUtils.consume(entity);
 		}

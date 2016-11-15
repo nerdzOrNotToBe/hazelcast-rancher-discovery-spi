@@ -28,7 +28,7 @@ public class RancherDiscoveryConfiguration {
 
     public static final PropertyDefinition ENVIRONMENT_NAME = new SimplePropertyDefinition("environment-name", PropertyTypeConverter.STRING);
 
-    public static final PropertyDefinition URL = new SimplePropertyDefinition("url", PropertyTypeConverter.STRING);
+    public static final PropertyDefinition RANCHER_API = new SimplePropertyDefinition("rancher-api", PropertyTypeConverter.STRING);
 
     private RancherDiscoveryConfiguration() {
 
