@@ -41,8 +41,8 @@ joinConfig.getTcpIpConfig().setEnabled(false);
 joinConfig.getMulticastConfig().setEnabled(false);
 joinConfig.getAwsConfig().setEnabled(false);
 DiscoveryConfig discoveryConfig = joinConfig.getDiscoveryConfig();
-//Set the discovery strategy to RangerDiscoveryStrategy
-DiscoveryStrategyConfig discoveryStrategyConfig = new DiscoveryStrategyConfig(new RangerDiscoveryStrategyFactory());
+//Set the discovery strategy to RancherDiscoveryStrategy
+DiscoveryStrategyConfig discoveryStrategyConfig = new DiscoveryStrategyConfig(new RancherDiscoveryStrategyFactory());
 discoveryStrategyConfig.addProperty("cluster-name", "test");
 discoveryStrategyConfig.addProperty("stack-name", "test");
 discoveryStrategyConfig.addProperty("environment-name", "Default");
