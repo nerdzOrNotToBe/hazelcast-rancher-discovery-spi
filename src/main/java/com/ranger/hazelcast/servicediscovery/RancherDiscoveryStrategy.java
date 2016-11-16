@@ -95,19 +95,23 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			HttpResponse response = client.execute(request);
 			HttpEntity entity = response.getEntity();
 			JSONObject jsonObject = (JSONObject) new JSONParser().parse(new InputStreamReader(entity.getContent(), "UTF-8"));
-			JSONArray data = (JSONArray) jsonObject.get("data");
-			data.forEach(x ->{
-				JSONObject env = (JSONObject) x;
-				if("running".equals(env.get("state"))) {
-					JSONObject assignment = new JSONObject();
-					assignment.put("host", env.get("name"));
-					assignment.put("ip", env.get("primaryIpAddress"));
-					list.add(assignment);
-				}
-			});
+			parseInstancesJson(list, jsonObject);
 			EntityUtils.consume(entity);
 		}
 		return list;
+	}
+
+	public static void parseInstancesJson(List<JSONObject> list, JSONObject jsonObject) {
+		JSONArray data = (JSONArray) jsonObject.get("data");
+		data.forEach(x ->{
+			JSONObject env = (JSONObject) x;
+			if("running".equals(env.get("state"))) {
+				JSONObject assignment = new JSONObject();
+				assignment.put("host", env.get("name"));
+				assignment.put("ip", env.get("primaryIpAddress"));
+				list.add(assignment);
+			}
+		});
 	}
 
 	private void findStack(CloseableHttpClient client) throws IOException, ParseException {
@@ -115,6 +119,11 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		HttpResponse response = client.execute(request);
 		HttpEntity entity = response.getEntity();
 		JSONObject jsonObject = (JSONObject) new JSONParser().parse(new InputStreamReader(entity.getContent(), "UTF-8"));
+		parseEnvironmentsJson(jsonObject);
+		EntityUtils.consume(entity);
+	}
+
+	public void parseEnvironmentsJson(JSONObject jsonObject) {
 		JSONArray data = (JSONArray) jsonObject.get("data");
 		data.forEach(x ->{
 			JSONObject stack = (JSONObject) x;
@@ -123,7 +132,6 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				stackId = (String) stack.get("id");
 			}
 		});
-		EntityUtils.consume(entity);
 	}
 
 	private void findEnvironment(CloseableHttpClient client) throws IOException, ParseException {
@@ -131,6 +139,11 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		HttpResponse response = client.execute(request);
 		HttpEntity entity = response.getEntity();
 		JSONObject jsonObject = (JSONObject) new JSONParser().parse(new InputStreamReader(entity.getContent(), "UTF-8"));
+		parseProjectsJson(jsonObject);
+		EntityUtils.consume(entity);
+	}
+
+	public void parseProjectsJson(JSONObject jsonObject) {
 		JSONArray data = (JSONArray) jsonObject.get("data");
 		data.forEach(x ->{
 			JSONObject env = (JSONObject) x;
@@ -139,7 +152,6 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				envId = (String) env.get("id");
 			}
 		});
-		EntityUtils.consume(entity);
 	}
 
 	private void filterService(CloseableHttpClient client) throws IOException, ParseException {
@@ -147,6 +159,11 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		HttpResponse response = client.execute(request);
 		HttpEntity entity = response.getEntity();
 		JSONObject jsonObject = (JSONObject) new JSONParser().parse(new InputStreamReader(entity.getContent(), "UTF-8"));
+		parseServicesJson(jsonObject);
+		EntityUtils.consume(entity);
+	}
+
+	public void parseServicesJson(JSONObject jsonObject) {
 		JSONArray data = (JSONArray) jsonObject.get("data");
 		data.forEach(x ->{
 			JSONObject service = (JSONObject) x;
@@ -157,7 +174,6 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				serviceId.add((String) service.get("id"));
 			}
 		});
-		EntityUtils.consume(entity);
 	}
 
 	private Iterable<DiscoveryNode> mapToDiscoveryNodes(List<JSONObject> assignments) {
