@@ -170,7 +170,7 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			JSONObject launchConfig = (JSONObject) service.get("launchConfig");
 			JSONObject environment = (JSONObject) launchConfig.get("environment");
 			String cluster = (String) environment.get("cluster-name");
-			if(clusterName.equals(cluster)){
+			if(clusterName != null && clusterName.equals(cluster)){
 				serviceId.add((String) service.get("id"));
 			}
 		});
