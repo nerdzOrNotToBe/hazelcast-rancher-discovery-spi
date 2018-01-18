@@ -16,6 +16,7 @@
 
 package com.ranger.hazelcast.servicediscovery;
 
+import com.hazelcast.spi.discovery.DiscoveryNode;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -52,6 +53,19 @@ public class DiscoveryTest {
 		ArrayList<JSONObject> list = new ArrayList<>();
 		rancherDiscoveryStrategy.parseInstancesJson(list,instances);
 		assertEquals(list.size(),4);
+	}
+
+	@Test
+	@Ignore
+	public void testDiscovery2() throws IOException, ParseException {
+		Map<String, Comparable> properties = new HashMap<>();
+		properties.put("cluster-name", "backend");
+		properties.put("stack-name", "spotter2");
+		properties.put("environment-name", "Default");
+		properties.put("rancher-api", "http://10.93.241.241:8080/v1");
+		RancherDiscoveryStrategy rancherDiscoveryStrategy = new RancherDiscoveryStrategy(null, properties);
+		Iterable<DiscoveryNode> discoveryNodes = rancherDiscoveryStrategy.discoverNodes();
+		assertEquals(discoveryNodes,0);
 	}
 
 }
