@@ -182,17 +182,18 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	private Iterable<DiscoveryNode> mapToDiscoveryNodes(List<JSONObject> assignments) {
 		Collection<DiscoveryNode> discoveredNodes = new ArrayList<>();
+		if(assignments != null) {
+			for (JSONObject assignment : assignments) {
+				String address = (String) assignment.get("ip");
+				String hostname = (String) assignment.get("host");
 
-		for (JSONObject assignment : assignments) {
-			String address = (String) assignment.get("ip");
-			String hostname = (String) assignment.get("host");
+				Map<String, Object> attributes = Collections.<String, Object>singletonMap("hostname", hostname);
 
-			Map<String, Object> attributes = Collections.<String, Object>singletonMap("hostname", hostname);
+				InetAddress inetAddress = mapToInetAddress(address);
+				Address addr = new Address(inetAddress, NetworkConfig.DEFAULT_PORT);
 
-			InetAddress inetAddress = mapToInetAddress(address);
-			Address addr = new Address(inetAddress, NetworkConfig.DEFAULT_PORT);
-
-			discoveredNodes.add(new SimpleDiscoveryNode(addr, attributes));
+				discoveredNodes.add(new SimpleDiscoveryNode(addr, attributes));
+			}
 		}
 		return discoveredNodes;
 	}
