@@ -43,10 +43,10 @@ joinConfig.getAwsConfig().setEnabled(false);
 DiscoveryConfig discoveryConfig = joinConfig.getDiscoveryConfig();
 //Set the discovery strategy to RancherDiscoveryStrategy
 DiscoveryStrategyConfig discoveryStrategyConfig = new DiscoveryStrategyConfig(new RancherDiscoveryStrategyFactory());
-discoveryStrategyConfig.addProperty("cluster-name", "test");
-discoveryStrategyConfig.addProperty("stack-name", "test");
-discoveryStrategyConfig.addProperty("environment-name", "Default");
-discoveryStrategyConfig.addProperty("rancher-api", "http://localhost:8080/v1");
+discoveryStrategyConfig.addProperty("CLUSTER_NAME", "test");
+discoveryStrategyConfig.addProperty("STACK_NAME", "test");
+discoveryStrategyConfig.addProperty("ENVIRONMENT_NAME", "Default");
+discoveryStrategyConfig.addProperty("RANCHER-API", "http://localhost:8080/v1");
 discoveryConfig.addDiscoveryStrategyConfig(discoveryStrategyConfig);
 //Create the hazelcast instance
 HazelcastInstance hazelcast = Hazelcast.newHazelcastInstance(config);

@@ -22,13 +22,13 @@ import com.hazelcast.config.properties.SimplePropertyDefinition;
 
 public class RancherDiscoveryConfiguration {
 
-    public static final PropertyDefinition CLUSTER_NAME = new SimplePropertyDefinition("cluster-name", PropertyTypeConverter.STRING);
+    public static final PropertyDefinition CLUSTER_NAME = new SimplePropertyDefinition("CLUSTER_NAME", PropertyTypeConverter.STRING);
 
-    public static final PropertyDefinition STACK_NAME = new SimplePropertyDefinition("stack-name", PropertyTypeConverter.STRING);
+    public static final PropertyDefinition STACK_NAME = new SimplePropertyDefinition("STACK_NAME", PropertyTypeConverter.STRING);
 
-    public static final PropertyDefinition ENVIRONMENT_NAME = new SimplePropertyDefinition("environment-name", PropertyTypeConverter.STRING);
+    public static final PropertyDefinition ENVIRONMENT_NAME = new SimplePropertyDefinition("ENVIRONMENT_NAME", PropertyTypeConverter.STRING);
 
-    public static final PropertyDefinition RANCHER_API = new SimplePropertyDefinition("rancher-api", PropertyTypeConverter.STRING);
+    public static final PropertyDefinition RANCHER_API = new SimplePropertyDefinition("RANCHER_API", PropertyTypeConverter.STRING);
 
     private RancherDiscoveryConfiguration() {
 

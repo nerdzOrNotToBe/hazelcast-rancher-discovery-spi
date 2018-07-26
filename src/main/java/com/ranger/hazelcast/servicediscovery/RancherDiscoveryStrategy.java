@@ -60,10 +60,10 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 		// make it possible to override the value from the configuration on
 		// the system's environment or JVM properties -Ddiscovery.hosts.site-domain=some.domain
-		this.clusterName = getOrNull("cluster-name", RancherDiscoveryConfiguration.CLUSTER_NAME);
-		this.stackName = getOrNull("stack-name", RancherDiscoveryConfiguration.STACK_NAME);
-		this.environmentName = getOrNull("environment-name", RancherDiscoveryConfiguration.ENVIRONMENT_NAME);
-		this.url = getOrNull("rancher-api", RancherDiscoveryConfiguration.RANCHER_API);
+		this.clusterName = getOrNull("CLUSTER_NAME", RancherDiscoveryConfiguration.CLUSTER_NAME);
+		this.stackName = getOrNull("STACK_NAME", RancherDiscoveryConfiguration.STACK_NAME);
+		this.environmentName = getOrNull("ENVIRONMENT_NAME", RancherDiscoveryConfiguration.ENVIRONMENT_NAME);
+		this.url = getOrNull("RANCHER_API", RancherDiscoveryConfiguration.RANCHER_API);
 	}
 
 	@Override
@@ -170,8 +170,8 @@ public class RancherDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			JSONObject launchConfig = (JSONObject) service.get("launchConfig");
 			if(  launchConfig.get("environment") != null) {
 				JSONObject environment = (JSONObject) launchConfig.get("environment");
-				if (environment.get("cluster-name") != null) {
-					String cluster = (String) environment.get("cluster-name");
+				if (environment.get("CLUSTER_NAME") != null) {
+					String cluster = (String) environment.get("CLUSTER_NAME");
 					if (clusterName.equals(cluster)) {
 						serviceId.add((String) service.get("id"));
 					}

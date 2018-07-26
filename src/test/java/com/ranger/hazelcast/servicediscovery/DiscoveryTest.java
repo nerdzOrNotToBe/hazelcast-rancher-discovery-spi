@@ -38,10 +38,10 @@ public class DiscoveryTest {
 	@Ignore
 	public void testDiscovery() throws IOException, ParseException {
 		Map<String, Comparable> properties = new HashMap<>();
-		properties.put("cluster-name", "backend");
-		properties.put("stack-name", "vertx1");
-		properties.put("environment-name", "Default");
-		properties.put("rancher-api", "http://10.34.0.252:8080/v1");
+		properties.put("CLUSTER_NAME", "backend");
+		properties.put("STACK_NAME", "vertx1");
+		properties.put("ENVIRONMENT_NAME", "Default");
+		properties.put("RANCHER_API", "http://10.34.0.252:8080/v1");
 		RancherDiscoveryStrategy rancherDiscoveryStrategy = new RancherDiscoveryStrategy(null, properties);
 		JSONObject projects = (JSONObject) new JSONParser().parse(new FileReader( getClass().getClassLoader().getResource("projects.json").getFile()));
 		JSONObject environments = (JSONObject) new JSONParser().parse(new FileReader( getClass().getClassLoader().getResource("environments.json").getFile()));
@@ -59,10 +59,10 @@ public class DiscoveryTest {
 	@Ignore
 	public void testDiscovery2() throws IOException, ParseException {
 		Map<String, Comparable> properties = new HashMap<>();
-		properties.put("cluster-name", "backend");
-		properties.put("stack-name", "spotter2");
-		properties.put("environment-name", "Default");
-		properties.put("rancher-api", "http://10.93.241.241:8080/v1");
+		properties.put("CLUSTER_NAME", "backend");
+		properties.put("STACK_NAME", "spotter2");
+		properties.put("ENVIRONMENT_NAME", "Default");
+		properties.put("RANCHER_API", "http://10.93.241.241:8080/v1");
 		RancherDiscoveryStrategy rancherDiscoveryStrategy = new RancherDiscoveryStrategy(null, properties);
 		Iterable<DiscoveryNode> discoveryNodes = rancherDiscoveryStrategy.discoverNodes();
 		assertEquals(discoveryNodes,0);
